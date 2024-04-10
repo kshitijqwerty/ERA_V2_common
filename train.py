@@ -58,8 +58,7 @@ class TrainHelper:
         correct = 0
         with torch.no_grad():
             for data, target in test_loader:
-                data = data.to(torch.float32)
-                target = target.to(torch.float32)
+                # Move to device
                 data, target = data.to(device), target.to(device)
                 output = model(data)
                 if loss_fn == 'cross_entropy':
