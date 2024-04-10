@@ -17,13 +17,10 @@ class TrainHelper:
         processed = 0
         for batch_idx, (data, target) in enumerate(pbar):
             # get samples
-            print(type(data))
-            data = data.to(torch.float32)
-            print(type(data))
-            target = target.to(torch.float32)
             
+            # Move to device
             data, target = data.to(device), target.to(device)
-            print(type(data))
+            # print(type(data))
 
             # Init
             optimizer.zero_grad()
