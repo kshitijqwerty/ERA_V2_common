@@ -89,3 +89,17 @@ class TrainHelper:
         axs[1, 1].plot(self.test_acc)
         axs[1, 1].set_title("Test Accuracy")
     
+    def train_for_epoch(self, model, device, train_loader, test_loader, optimizer, scheduler=None, epoch=50, loss_fn='nll_loss'):
+        for i in range(epoch):
+            if(scheduler):
+                current_lr = scheduler.get_lr()
+                for param_group in optimizer.param_groups:
+                    param_group['lr'] = current_lr
+            print("EPOCH:", i+1)
+            self.train_model(model, device, train_loader, optimizer, loss_fn)
+            self.test_model(model, device, test_loader, loss_fn)
+            if(scheduler):
+                current_lr = scheduler.step()
+                
+            
+    

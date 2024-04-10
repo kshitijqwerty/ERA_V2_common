@@ -30,11 +30,10 @@ def max_lr_finder(model, train_loader, test_loader, device):
 
 
 class OneCyclePolicy:
-    def __init__(self, max_lr, min_lr, epochs, steps_per_epoch, peak_epoch):
+    def __init__(self, max_lr, min_lr, epochs, peak_epoch):
         self.max_lr = max_lr
         self.min_lr = min_lr
         self.epochs = epochs
-        self.steps_per_epoch = steps_per_epoch
         self.peak_epoch = peak_epoch
         self.current_epoch = 0
 
