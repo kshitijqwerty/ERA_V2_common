@@ -93,6 +93,7 @@ class TrainHelper:
         for i in range(epoch):
             if(scheduler):
                 current_lr = scheduler.get_lr()
+                print("Current LR from Scheduler: "+str(current_lr))
                 for param_group in optimizer.param_groups:
                     param_group['lr'] = current_lr
             print("EPOCH:", i+1)
