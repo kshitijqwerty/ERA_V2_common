@@ -2,7 +2,7 @@ from torchvision import datasets
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
 from torch.utils.data import DataLoader
-
+import torch
 
 # Custom Class to work with albumentations lib
 class CIFAR10Custom(datasets.CIFAR10):
@@ -32,7 +32,7 @@ class CIFAR10Custom(datasets.CIFAR10):
         image, lab = self.data[index], self.targets[index]
         if(self.transform is not None):
             image = self.transform(image=image)
-        return image['image'], lab
+        return image['image'].to(torch.float32), lab
     
     def get_dataloader(self):
         return DataLoader(self, **self.dataloader_args)
