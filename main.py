@@ -1,7 +1,31 @@
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 import torch.nn.functional as F
+from torch.utils.data import Dataset
+from torch.utils.data import DataLoader
 import torch
+
+
+
+class CustomDataset(Dataset):
+    def __init__(self, data, targets, transform=None):
+        self.data = data
+        self.targets = targets
+        self.transform = transform
+        
+    def __getitem__(self, index):
+        image, lab = self.data[index], self.targets[index]
+        if(self.transform is not None):
+            image = self.transform(image=image)
+        return image['image'].to(torch.float32), lab
+    
+    def __len__(self):
+        return len(self.data)
+    
+    
+    def get_dataloader(self, batch_size, shuffle=True, use_cuda=False ):
+        dataloader_args = dict(shuffle=True, batch_size=batch_size, num_workers=4, pin_memory=True) if use_cuda else dict(shuffle=True, batch_size=64)
+        return DataLoader(self, **dataloader_args)
 
 class TrainHelper:
     def __init__(self):
@@ -10,7 +34,7 @@ class TrainHelper:
         self.train_acc = []
         self.test_acc = []
 
-    def train_model(self, model, device, train_loader, optimizer, loss_fn='nll_loss'):
+    def train_model(self, model, device, train_loader, optimizer, scheduler, loss_fn='nll_loss'):
         model.train()
         pbar = tqdm(train_loader)
         correct = 0
@@ -42,6 +66,8 @@ class TrainHelper:
             # Backpropagation
             loss.backward()
             optimizer.step()
+            if(scheduler):
+                scheduler.step()
 
             # Update pbar-tqdm
             
@@ -88,19 +114,13 @@ class TrainHelper:
         axs[0, 1].set_title("Test Loss")
         axs[1, 1].plot(self.test_acc)
         axs[1, 1].set_title("Test Accuracy")
+        
     
     def train_for_epoch(self, model, device, train_loader, test_loader, optimizer, scheduler=None, epoch=50, loss_fn='nll_loss'):
         for i in range(epoch):
-            if(scheduler):
-                current_lr = scheduler.get_lr()
-                print("Current LR from Scheduler: "+str(current_lr))
-                for param_group in optimizer.param_groups:
-                    param_group['lr'] = current_lr
             print("EPOCH:", i+1)
-            self.train_model(model, device, train_loader, optimizer, loss_fn)
+            self.train_model(model, device, train_loader, optimizer, scheduler, loss_fn)
             self.test_model(model, device, test_loader, loss_fn)
-            if(scheduler):
-                current_lr = scheduler.step()
                 
             
     
