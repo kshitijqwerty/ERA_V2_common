@@ -3,6 +3,8 @@ from albumentations.pytorch import ToTensorV2
 from torchvision import transforms
 import cv2
 from torch_lr_finder import LRFinder
+from pytorch_grad_cam import GradCAM
+from pytorch_grad_cam.utils.image import show_cam_on_image
 
 def transform_cifar_A10():
     return A.Compose(
@@ -42,3 +44,49 @@ def max_lr_finder(model, train_loader, optimizer, criterion, device):
     lr_finder.range_test(train_loader, end_lr=10, num_iter=200, step_mode="exp")
     lr_finder.plot(log_lr=False)
     lr_finder.reset()
+
+def plot_gradcam(images, target_layers):
+    num_images = len(images)
+    for i in range(num_images):
+        # Convert image to tensor and move to device
+        img_tensor = images[i].unsqueeze(0).to(device)
+        # Normalize image tensor
+        img_tensor_normalized = (img_tensor - img_tensor.min()) / (img_tensor.max() - img_tensor.min())
+        # Forward pass
+        num_plots = len(target_layers)+1
+        plt.figure(figsize=(10, 5))
+        plt.subplot(1, num_plots, 1)
+        plt.imshow(np.transpose(images[i]/ 2 + 0.5, (1, 2, 0)))
+        # plt.title(f'(Actual: {classes[correct_labels[i]]}, Predicted: {classes[misclassified_labels[i]]})')
+        plt.axis('off')
+        for i, layer in enumerate(target_layers):
+            gradcam = GradCAM(model=model, target_layers=[layer])
+            out = gradcam.forward(img_tensor_normalized, None, eigen_smooth=True)
+            img_with_heatmap = show_cam_on_image(np.transpose(img_tensor_normalized.squeeze().cpu().numpy(), (1, 2, 0)), out.squeeze(), use_rgb=True)
+            plt.subplot(1, num_plots, i+2)
+            plt.imshow(img_with_heatmap)
+            # plt.title('GradCAM')
+            plt.axis('off')
+        plt.show() 
+
+def get_misclassified(model, device, test_loader, n=10):
+    model.eval()
+    misclassified_images = []
+    misclassified_labels = []
+    correct_labels = []
+    with torch.no_grad():
+        for data, target in test_loader:
+            data, target = data.to(device), target.to(device)
+            output = model(data)
+            pred = output.argmax(dim=1)
+            for i, (img, x,y) in enumerate(zip(data, pred, target)):
+                if(x != y):
+                    misclassified_images.append(img.cpu())
+                    misclassified_labels.append(x.cpu())
+                    correct_labels.append(y.cpu())
+                if len(misclassified_images) >= n:
+                    break
+                    
+                
+            break
+        return misclassified_images, misclassified_labels, correct_labels
