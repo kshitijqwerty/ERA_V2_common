@@ -48,7 +48,7 @@ def max_lr_finder(model, train_loader, optimizer, criterion, device):
     lr_finder.plot(log_lr=False)
     lr_finder.reset()
 
-def plot_gradcam(model, device, images, target_layers):
+def plot_gradcam(model, device, images, mis_labels, correct_labels, target_layers):
     num_images = len(images)
     for i in range(num_images):
         # Convert image to tensor and move to device
@@ -60,7 +60,7 @@ def plot_gradcam(model, device, images, target_layers):
         plt.figure(figsize=(10, 5))
         plt.subplot(1, num_plots, 1)
         plt.imshow(np.transpose(images[i]/ 2 + 0.5, (1, 2, 0)))
-        # plt.title(f'(Actual: {classes[correct_labels[i]]}, Predicted: {classes[misclassified_labels[i]]})')
+        plt.title(f'(Actual: {correct_labels[i]}, Predicted: {misclassified_labels[i]})')
         plt.axis('off')
         for i, layer in enumerate(target_layers):
             gradcam = GradCAM(model=model, target_layers=[layer])
