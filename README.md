@@ -17,4 +17,4 @@ project_root/
 
 - The models folder contains Python files for different machine learning or deep learning models.
 - main.py contains training testing loops and Dataset functions
-- utils.py contains 
+- utils.py contains helper functions
