@@ -46,7 +46,7 @@ def max_lr_finder(model, train_loader, optimizer, criterion, device):
     lr_finder.plot(log_lr=False)
     lr_finder.reset()
 
-def plot_gradcam(model, images, target_layers):
+def plot_gradcam(model, device, images, target_layers):
     num_images = len(images)
     for i in range(num_images):
         # Convert image to tensor and move to device
