@@ -60,7 +60,7 @@ def plot_gradcam(model, device, images, mis_labels, correct_labels, target_layer
         plt.figure(figsize=(10, 5))
         plt.subplot(1, num_plots, 1)
         plt.imshow(np.transpose(images[i]/ 2 + 0.5, (1, 2, 0)))
-        plt.title(f'(Actual: {correct_labels[i]}, Predicted: {misclassified_labels[i]})')
+        plt.title(f'(Actual: {correct_labels[i]}, Predicted: {mis_labels[i]})')
         plt.axis('off')
         for i, layer in enumerate(target_layers):
             gradcam = GradCAM(model=model, target_layers=[layer])
